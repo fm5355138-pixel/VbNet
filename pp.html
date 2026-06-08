@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis ASAS Genap VB.Net</title>
+    <style>
+        /* --- CSS STYLING --- */
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #2ecc71;
+            --wrong-color: #e74c3c;
+            --bg-color: #f5f7fa;
+            --card-color: #ffffff;
+            --text-color: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            background-color: var(--card-color);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 700px;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-header {
+            border-bottom: 2px solid #eaeded;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .quiz-header h1 {
+            font-size: 20px;
+            color: var(--primary-color);
+        }
+
+        .progress {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--secondary-color);
+            background-color: #e8f4fd;
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        pre {
+            background-color: #2d3748;
+            color: #f7fafc;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 10px 0 20px 0;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .option-btn {
+            background-color: #fff;
+            border: 2px solid #dcdde1;
+            border-radius: 8px;
+            padding: 14px 20px;
+            text-align: left;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            display: block;
+        }
+
+        .option-btn:hover:not([disabled]) {
+            border-color: var(--secondary-color);
+            background-color: #f7f9fa;
+        }
+
+        .option-btn.correct {
+            background-color: #d4edda !important;
+            border-color: var(--success-color) !important;
+            color: #155724;
+            font-weight: 600;
+        }
+
+        .option-btn.wrong {
+            background-color: #f8d7da !important;
+            border-color: var(--wrong-color) !important;
+            color: #721c24;
+        }
+
+        .rationale-box {
+            background-color: #eec15c2b;
+            border-left: 4px solid #f1c40f;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .quiz-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .next-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .next-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .next-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        /* Result View */
+        .result-view {
+            text-align: center;
+            display: none;
+        }
+
+        .result-view h2 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            font-weight: bold;
+            margin: 20px auto;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+        }
+
+        .restart-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+        <div id="quiz-box">
+            <div class="quiz-header">
+                <h1 id="quiz-title">Latihan ASAS Genap VB.Net</h1>
+                <div class="progress" id="progress-text">Soal 1 dari 40</div>
+            </div>
+            
+            <div class="question-text" id="question-cloud">Memuat soal...</div>
+            
+            <div class="options-container" id="options-cloud">
+                </div>
+
+            <div class="rationale-box" id="rationale-cloud">
+                <strong>Pembahasan:</strong> <span id="rationale-text"></span>
+            </div>
+            
+            <div class="quiz-footer">
+                <button class="next-btn" id="next-button" disabled>Soal Berikutnya</button>
+            </div>
+        </div>
+
+        <div class="result-view" id="result-box">
+            <h2>Kuis Selesai!</h2>
+            <p>Nilai hasil ujian latihan kamu:</p>
+            <div class="score-circle" id="score-text">0</div>
+            <p id="summary-text">Kamu menjawab benar 0 dari 40 soal.</p>
+            <button class="restart-btn" onclick="restartQuiz()">Coba Lagi</button>
+        </div>
+    </div>
+
+    <script>
+        // --- JAVASCRIPT LOGIC ---
+        
+        // Data Mentah 40 Soal Pilihan Ganda Berdasarkan Kisi-Kisi
+        const quizData = [
+            {
+                question: "Komponen Toolbox pada VB.Net yang digunakan untuk menerima inputan teks dari pengguna secara bebas adalah...",
+                options: ["Label", "TextBox", "ComboBox", "Button"],
+                correct: 1,
+                rationale: "TextBox adalah komponen standar yang berfungsi untuk menerima input data berupa teks atau angka dari pengguna secara bebas."
+            },
+            {
+                question: "Jika ingin memicu sebuah proses atau eksekusi kode saat pengguna melakukan klik, komponen Toolbox yang paling tepat digunakan adalah...",
+                options: ["Button", "CheckBox", "ListBox", "RadioButton"],
+                correct: 0,
+                rationale: "Button dirancang khusus untuk mendeteksi event Click guna menjalankan perintah atau prosedur tertentu."
+            },
+            {
+                question: "Manakah di bawah ini yang merupakan operator aritmatika di VB.Net untuk melakukan operasi pembagian bilangan bulat (integer division)?",
+                options: ["/", "\\", "Mod", "*"],
+                correct: 1,
+                rationale: "Backslash (\\) digunakan untuk pembagian bilangan bulat yang membuang sisa pembagiannya."
+            },
+            {
+                question: "Perhatikan ekspresi berikut: Hasil = 17 Mod 4. Nilai dari variabel Hasil adalah...",
+                options: ["4", "1", "0", "2"],
+                correct: 1,
+                rationale: "Modulus menghitung sisa bagi. 17 dibagi 4 mendapatkan 4 dengan sisa 1 (4 x 4 = 16, sisa 1)."
+            },
+            {
+                question: "Dalam VB.Net, simbol yang digunakan untuk operator relasi 'tidak sama dengan' adalah...",
+                options: ["!=", "<>", "==", "not="],
+                correct: 1,
+                rationale: "Di VB.Net, tanda kurang dari dan lebih dari yang digabungkan (<>) merepresentasikan operasi tidak sama dengan."
+            },
+            {
+                question: "Manakah sintaks yang benar untuk membandingkan apakah nilai NilaiA lebih besar atau sama dengan NilaiB?",
+                options: ["NilaiA => NilaiB", "NilaiA >= NilaiB", "NilaiA > = NilaiB", "NilaiA GTE NilaiB"],
+                correct: 1,
+                rationale: ">= adalah standar penulisan operator lebih besar atau sama dengan di VB.Net tanpa spasi."
+            },
+            {
+                question: "Perintah SQL dasar yang digunakan untuk mengambil atau menampilkan data dari tabel database adalah...",
+                options: ["INSERT", "SELECT", "UPDATE", "DROP"],
+                correct: 1,
+                rationale: "SELECT adalah perintah query SQL utama untuk membaca atau mengambil records dari database."
+            },
+            {
+                question: "Bagaimana cara mengambil seluruh kolom yang ada pada sebuah tabel bernama tbl_siswa menggunakan query SQL?",
+                options: ["SELECT ALL FROM tbl_siswa", "SELECT * FROM tbl_siswa", "SELECT kolom FROM tbl_siswa", "GET * FROM tbl_siswa"],
+                correct: 1,
+                rationale: "Karakter asterisk (*) dalam SQL berfungsi sebagai wildcard untuk mewakili semua kolom/field."
+            },
+            {
+                question: "Fokus utama dari Desain User Interface (UI) pada pembuatan aplikasi Desktop VB.Net adalah...",
+                options: ["Alur logika dan efisiensi algoritma coding", "Estetika visual, layout komponen, keselarasan warna, dan tipografi form", "Kecepatan query data ke server database", "Kepuasan emosional dan kemudahan pengguna saat menjelajahi aplikasi"],
+                correct: 1,
+                rationale: "UI menitikberatkan pada apa yang dilihat langsung oleh mata pengguna agar tampilan aplikasi menarik dan estetis."
+            },
+            {
+                question: "Aspek User Experience (UX) yang baik pada form transaksi penjualan dapat ditunjukkan dengan...",
+                options: ["Membuat warna background form sekantor mencolok mungkin", "Mengurangi jumlah klik tombol dan memberikan shortcut keyboard untuk mempercepat input data", "Menyembunyikan tombol batal agar pengguna tidak salah klik", "Menggunakan font dekoratif yang meliuk-liuk agar terlihat berseni"],
+                correct: 1,
+                rationale: "UX mengutamakan kemudahan, efisiensi, dan kenyamanan alur kerja pengguna saat mengoperasikan sistem."
+            },
+            {
+                question: "Properti atau baris kode apa pada DataGridView (DGV) yang digunakan untuk menghitung total baris data yang ditampilkan?",
+                options: ["DataGridView1.Rows.Count", "DataGridView1.Columns.Count", "DataGridView1.Rows.Clear()", "DataGridView1.Items.Count"],
+                correct: 0,
+                rationale: "Rows.Count mengembalikan nilai integer yang merepresentasikan jumlah total baris pada control DataGridView."
+            },
+            {
+                question: "Sintaks DataGridView1.Rows(0).Cells(1).Value digunakan untuk mengakses...",
+                options: ["Data pada baris kedua kolom pertama", "Data pada baris pertama kolom kedua", "Data pada baris kedua kolom kedua", "Seluruh baris pertama di DataGridView"],
+                correct: 1,
+                rationale: "Indeks dimulai dari 0. Rows(0) menunjuk baris pertama dan Cells(1) menunjuk kolom kedua."
+            },
+            {
+                question: "Saat membuat Installer/File Setup untuk aplikasi VB.Net menggunakan Visual Studio Installer Extension, project baru yang harus ditambahkan adalah...",
+                options: ["Class Library Project", "Setup Project", "Windows Forms App Project", "Console Application"],
+                correct: 1,
+                rationale: "Setup Project adalah tipe template project yang digunakan untuk memaketkan file aplikasi menjadi installer (.msi/.exe)."
+            },
+            {
+                question: "Agar aplikasi yang diinstal menyertakan file database lokal (.mdf / .accdb) ke komputer klien, di folder mana file database tersebut diletakkan dalam 'File System on Target Machine'?",
+                options: ["Application Folder", "User's Desktop Folder", "User's Programs Menu Folder", "Global Assembly Cache (GAC)"],
+                correct: 0,
+                rationale: "Application Folder adalah direktori instalasi utama aplikasi di mana file executable (.exe) dan file pendukung disatukan."
+            },
+            {
+                question: "Sintaks paling dasar untuk menampilkan kotak pesan berisi teks peringatan sederhana di VB.Net adalah...",
+                options: ["Alert('Pesan')", "MessageBox.Show('Pesan')", "Console.WriteLine('Pesan')", "Message.PopUp('Pesan')"],
+                correct: 1,
+                rationale: "MessageBox.Show adalah metode standar .NET Framework untuk memunculkan modal dialog box berisi pesan kepada user."
+            },
+            {
+                question: "Perhatikan baris kode: MessageBox.Show('Hapus data?', 'Konfirmasi'). Bagian teks 'Konfirmasi' berfungsi sebagai...",
+                options: ["Isi pesan utama di dalam kotak", "Judul (Title Bar) dari kotak pesan", "Nama variabel penampung aksi", "Keterangan tombol otomatis"],
+                correct: 1,
+                rationale: "Argumen kedua pada fungsi MessageBox.Show bertindak sebagai teks judul yang muncul di bagian atas bingkai jendela pop-up."
+            },
+            {
+                question: "Struktur kontrol keputusan If...Then...Else digunakan untuk...",
+                options: ["Menjalankan perintah secara berulang-ulang", "Memilih blok kode tertentu yang akan dieksekusi berdasarkan evaluasi kondisi logika", "Menghapus seluruh isi data dalam tabel database", "Mendeklarasikan tipe variabel baru dalam fungsi"],
+                correct: 1,
+                rationale: "Struktur If menguji nilai boolean untuk mengarahkan alur jalannya program sesuai kondisi terpenuhi atau tidak."
+            },
+            {
+                question: "Sintaks percabangan If yang benar untuk memeriksa apakah input di TextBox1 kosong adalah...",
+                options: ["If TextBox1.Text = \"\" Then", "If TextBox1.Text = \"\" { }", "If TextBox1.Text IS blank Then", "If TextBox1.Text = NULL"],
+                correct: 0,
+                rationale: "Ini adalah format penulisan percabangan If standar di VB.Net yang wajib diakhiri dengan keyword Then."
+            },
+            {
+                question: "Manakah query SQL di bawah ini yang digunakan untuk menambahkan record baru ke dalam tabel data?",
+                options: ["ADD TO tbl_barang VALUES(...)", "INSERT INTO tbl_barang VALUES(...)", "UPDATE tbl_barang SET(...)", "CREATE RECORD tbl_barang(...)"],
+                correct: 1,
+                rationale: "INSERT INTO merupakan perintah dasar DML SQL untuk menyisipkan baris data baru ke dalam kolom tabel."
+            },
+            {
+                question: "Untuk menghapus data pengguna yang memiliki ID bernama 'USR002' di tabel tbl_users, query CRUD yang tepat adalah...",
+                options: ["REMOVE FROM tbl_users WHERE id_user = 'USR002'", "DELETE FROM tbl_users WHERE id_user = 'USR002'", "DROP RECORD id_user = 'USR002' FROM tbl_users", "DELETE id_user = 'USR002' FROM tbl_users"],
+                correct: 1,
+                rationale: "DELETE FROM dikombinasikan dengan klausa WHERE mengisolasi penghapusan hanya pada baris yang sesuai kriteria."
+            },
+            {
+                question: "Karakteristik utama dari perulangan Do While...Loop adalah...",
+                options: ["Pasti menjalankan instruksi minimal satu kali", "Melakukan pengecekan kondisi terlebih dahulu di awal sebelum masuk blok kode", "Hanya bisa digunakan jika jumlah perulangannya sudah diketahui pasti", "Akan langsung berhenti otomatis jika kondisi bernilai True"],
+                correct: 1,
+                rationale: "Do While mengevaluasi kondisi terlebih dahulu di atas. Jika True, kode dijalankan; jika False sejak awal, kode tidak berjalan."
+            },
+            {
+                question: "Perhatikan kode: Dim x=1; Do While x < 4; x=x+1; Loop. Berapakah nilai akhir x?",
+                options: ["3", "4", "5", "1"],
+                correct: 1,
+                rationale: "Loop terus berjalan hingga x bernilai 4. Ketika x=4, kondisi 4 < 4 bernilai False dan perulangan pun berhenti."
+            },
+            {
+                question: "Namespace / Library framework .NET yang wajib diimpor untuk mengoneksikan aplikasi VB.Net dengan database MySQL adalah...",
+                options: ["System.Data.SqlClient", "MySql.Data.MySqlClient", "System.Data.OleDb", "System.Data.Odbc"],
+                correct: 1,
+                rationale: "MySqlClient merupakan bagian dari MySQL Connector/NET yang menangani driver native komunikasi data dengan server MySQL."
+            },
+            {
+                question: "Method yang dipanggil pada objek Connection (misal: conn) untuk mengaktifkan alur koneksi ke database adalah...",
+                options: ["conn.Connect()", "conn.Open()", "conn.Start()", "conn.Active = True"],
+                correct: 1,
+                rationale: "Method Open() menginisialisasi sambungan fisik ke database berdasarkan parameter connection string yang diatur."
+            },
+            {
+                question: "Fungsi utama dari klausa WHERE dalam sebuah query SQL SELECT data adalah...",
+                options: ["Mengurutkan data dari besar ke kecil", "Menyaring (memfilter) data record yang ditampilkan berdasarkan kriteria", "Menggabungkan dua tabel database yang terpisah", "Membatasi jumlah baris maksimal yang keluar di output"],
+                correct: 1,
+                rationale: "WHERE bertindak sebagai penyaring sehingga hanya baris data yang memenuhi syarat yang akan diangkut query."
+            },
+            {
+                question: "Bagaimana penulisan query SQL yang benar untuk mencari barang yang harga jualnya di atas 50000?",
+                options: ["SELECT * FROM tbl_barang HAVING harga > 50000", "SELECT * FROM tbl_barang WHERE harga > 50000", "SELECT * FROM tbl_barang IF harga > 50000", "FILTER tbl_barang WHERE harga > 50000"],
+                correct: 1,
+                rationale: "Struktur SELECT-FROM-WHERE dengan simbol matematika lebih besar (>) adalah cara memfilter kolom numerik biasa."
+            },
+            {
+                question: "Dalam merancang sistem keamanan login, alur logika pertama yang dijalankan saat tombol Login diklik oleh user adalah...",
+                options: ["Langsung membuka Form Menu Utama", "Memeriksa apakah input username dan password di form kosong atau tidak", "Menghapus seluruh record data di tabel user", "Mengubah status password menjadi terlihat"],
+                correct: 1,
+                rationale: "Validasi kelengkapan input form (kosong atau tidaknya) sangat penting dilakukan sebelum mengirimkan data ke database."
+            },
+            {
+                question: "Jika query pencarian data user mencocokkan input form menghasilkan jumlah record = 0, tindakan sistem login yang benar adalah...",
+                options: ["Menampilkan pesan bahwa username/password salah dan tetap di Form Login", "Menutup aplikasi secara paksa tanpa pesan", "Mengizinkan pengguna masuk ke Menu Utama", "Menyimpan otomatis data inputan tersebut sebagai user baru"],
+                correct: 0,
+                rationale: "Jika record 0 artinya kombinasi user/pass tidak ditemukan di database, login gagal dan akses ditolak demi keamanan."
+            },
+            {
+                question: "Properti bawaan TextBox yang diubah nilainya menjadi karakter tertentu (misalnya '*') untuk menyembunyikan tulisan password asli adalah...",
+                options: ["PasswordChar", "HideText", "TextMode", "Visible"],
+                correct: 0,
+                rationale: "Properti PasswordChar berfungsi menyembunyikan teks inputan asli dengan karakter penutup yang ditentukan desainer."
+            },
+            {
+                question: "Selain menggunakan properti satu karakter khusus, properti Boolean apa yang bisa diaktifkan (Set True) untuk menyembunyikan input password mengikuti sistem operasi default?",
+                options: ["UseSystemPasswordChar", "EnablePasswordShield", "MaskInput", "IsPassword"],
+                correct: 0,
+                rationale: "Jika UseSystemPasswordChar diset True, TextBox otomatis menggunakan karakter pelindung default dari OS Windows (seperti bullet bulat hitam)."
+            },
+            {
+                question: "Tindakan memvalidasi input agar TextBox Nilai hanya bisa diisi oleh angka/numerik saja bertujuan untuk...",
+                options: ["Mencegah error runtime (seperti 'Invalid Cast Exception') saat operasi aritmatika dijalankan", "Mempercepat proses loading form saat pertama dibuka", "Menghemat kapasitas memori harddisk server", "Mengubah warna font TextBox secara otomatis"],
+                correct: 0,
+                rationale: "Jika program mencoba menghitung matematika dari string huruf, aplikasi akan langsung crash/error di runtime."
+            },
+            {
+                question: "Event pada komponen TextBox yang paling cocok digunakan untuk mencegah/menyaring ketikan tombol keyboard pengguna secara langsung per karakter adalah...",
+                options: ["TextChanged", "KeyPress", "Click", "Leave"],
+                correct: 1,
+                rationale: "Event KeyPress menangkap argumen e.KeyChar sehingga kode bisa membatalkan input tombol sebelum tercetak ke layar."
+            },
+            {
+                question: "Manakah komponen Toolbox di VB.Net yang berfungsi sebagai wadah (container) untuk mengelompokkan beberapa komponen UI agar rapi dan bisa digeser bersamaan?",
+                options: ["Panel atau GroupBox", "PictureBox", "ToolTip", "Timer"],
+                correct: 0,
+                rationale: "Panel dan GroupBox merupakan komponen container utama untuk merapikan layout elemen UI yang berkelompok."
+            },
+            {
+                question: "Perhatikan ekspresi logika berikut: Hasil = (10 > 5) And (3 = 4). Nilai akhir dari Hasil adalah...",
+                options: ["True", "False", "Null", "Error"],
+                correct: 1,
+                rationale: "Kondisi pertama adalah True, namun kondisi kedua (3=4) adalah False. Operator 'And' menghasilkan nilai akhir False."
+            },
+            {
+                question: "Simbol komparasi relasional yang digunakan untuk menyatakan kondisi 'kurang dari atau sama dengan' di VB.Net adalah...",
+                options: ["=<", "<=", "=<=", "UNDER"],
+                correct: 1,
+                rationale: "Simbol <= secara valid menyatakan perbandingan matematika kurang dari atau sama dengan dalam kode."
+            },
+            {
+                question: "Untuk mengurutkan data yang diambil via query SQL SELECT berdasarkan kolom urutan alfabet abjad nama dari A ke Z, kita menambahkan perintah...",
+                options: ["ORDER BY nama DESC", "ORDER BY nama ASC", "SORT BY nama", "GROUP BY nama"],
+                correct: 1,
+                rationale: "ASC (Ascending) mengurutkan data dari nilai terkecil ke terbesar, atau dari abjad A ke Z."
+            },
+            {
+                question: "Komponen visual DataGridView (DGV) sangat cocok digunakan dalam program VB.Net untuk urusan...",
+                options: ["Menampilkan sekumpulan data tabel dari database dalam bentuk baris dan kolom", "Memutar berkas audio musik latar belakang aplikasi", "Mengetikkan teks dokumen panjang berekstensi .rtf", "Menyimpan konfigurasi rahasia password string"],
+                correct: 0,
+                rationale: "DataGridView didesain khusus untuk merepresentasikan koleksi tabel data relasional secara visual di UI desktop."
+            },
+            {
+                question: "Sintaks percabangan bertingkat yang digunakan untuk mengecek kondisi bercabang lebih dari dua opsi pilihan pada VB.Net menggunakan kata kunci...",
+                options: ["ElseIf", "Else If", "SwitchCondition", "Otherwise"],
+                correct: 0,
+                rationale: "Keyword 'ElseIf' (ditulis menyatu tanpa spasi) dipakai untuk menyambung rantai kondisi baru di bawah blok If utama."
+            },
+            {
+                question: "Query SQL CRUD manakah yang digunakan untuk memperbarui atau mengubah data harga barang menjadi 15000 bagi kode barang 'BRG005'?",
+                options: ["CHANGE tbl_barang SET harga = 15000 WHERE kode = 'BRG005'", "UPDATE tbl_barang SET harga = 15000 WHERE kode = 'BRG005'", "REPLACE tbl_barang WITH harga = 15000", "UPDATE harga = 15000 IN tbl_barang WHERE kode = 'BRG005'"],
+                correct: 1,
+                rationale: "Sintaks UPDATE dikombinasikan dengan SET dan filter WHERE adalah format standar pengubahan data tabel."
+            },
+            {
+                question: "Tujuan utama menyertakan pesan validasi (Validation Message) saat pengguna menginput data yang salah pada aplikasi adalah...",
+                options: ["Membuat program sengaja hang agar user jera", "Memberikan informasi yang jelas mengenai kesalahan input agar pengguna tahu cara memperbaikinya", "Mengubah enkripsi password secara otomatis di database", "Menghapus seluruh baris kode program utama"],
+                correct: 1,
+                rationale: "Pesan validasi memandu user untuk memasukkan format data yang benar demi kelancaran alur sistem (Good UX)."
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const questionCloud = document.getElementById("question-cloud");
+        const optionsCloud = document.getElementById("options-cloud");
+        const progressText = document.getElementById("progress-text");
+        const nextButton = document.getElementById("next-button");
+        const rationaleCloud = document.getElementById("rationale-cloud");
+        const rationaleText = document.getElementById("rationale-text");
+        const quizBox = document.getElementById("quiz-box");
+        const resultBox = document.getElementById("result-box");
+        const scoreText = document.getElementById("score-text");
+        const summaryText = document.getElementById("summary-text");
+
+        // Fungsi Memulai Kuis
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            quizBox.style.display = "block";
+            resultBox.style.display = "none";
+            nextButton.addEventListener("click", handleNextButton);
+            showQuestion();
+        }
+
+        // Fungsi Menampilkan Soal ke UI
+        function showQuestion() {
+            resetState();
+            let currentQuestion = quizData[currentQuestionIndex];
+            progressText.innerText = `Soal ${currentQuestionIndex + 1} dari ${quizData.length}`;
+            questionCloud.innerText = currentQuestion.question;
+
+            // Generate opsi pilihan jawaban
+            currentQuestion.options.forEach((option, index) => {
+                const button = document.createElement("button");
+                button.innerText = `${String.fromCharCode(65 + index)}. ${option}`; // Label A, B, C, D
+                button.classList.add("option-btn");
+                button.addEventListener("click", () => selectOption(index, button));
+                optionsCloud.appendChild(button);
+            });
+        }
+
+        // Reset Tampilan Tiap Pindah Soal
+        function resetState() {
+            nextButton.disabled = true;
+            rationaleCloud.style.display = "none";
+            while (optionsCloud.firstChild) {
+                optionsCloud.removeChild(optionsCloud.firstChild);
+            }
+        }
+
+        // Fungsi Ketika Salah Satu Opsi Diklik
+        function selectOption(selectedIndex, clickedButton) {
+            const currentQuestion = quizData[currentQuestionIndex];
+            const correctIndex = currentQuestion.correct;
+            const allButtons = optionsCloud.querySelectorAll(".option-btn");
+
+            // Matikan semua tombol agar tidak bisa klik dua kali
+            allButtons.forEach(btn => btn.disabled = true);
+
+            if (selectedIndex === correctIndex) {
+                clickedButton.classList.add("correct");
+                score++;
+            } else {
+                clickedButton.classList.add("wrong");
+                // Tampilkan letak jawaban yang benar
+                allButtons[correctIndex].classList.add("correct");
+            }
+
+            // Tampilkan Pembahasan Khusus Soal Tersebut
+            rationaleText.innerText = currentQuestion.rationale;
+            rationaleCloud.style.display = "block";
+
+            nextButton.disabled = false;
+        }
+
+        // Fungsi Navigasi Tombol Lanjut / Selesai
+        function handleNextButton() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        // Fungsi Menampilkan Hasil Akhir Skor Ujian
+        function showResult() {
+            quizBox.style.display = "none";
+            resultBox.style.display = "block";
+            
+            // Konversi nilai mentah menjadi skala 100
+            let finalScore = Math.round((score / quizData.length) * 100);
+            scoreText.innerText = finalScore;
+            summaryText.innerText = `Kamu berhasil menjawab benar ${score} dari ${quizData.length} soal.`;
+        }
+
+        // Fungsi Mengulang Kuis Kembali
+        function restartQuiz() {
+            startQuiz();
+        }
+
+        // Jalankan kuis pertama kali saat halaman dimuat
+        startQuiz();
+    </script>
+</body>
+</html>
